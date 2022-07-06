@@ -179,6 +179,7 @@ void Menu() {
         framecount = 0;
         status = RANDUM;
         StopSoundMem(sound_title);  //現在のBGMをとめる
+        srand((unsigned int)time(NULL));  //乱数の初期化
         stage_num = (rand() % ((generatenum - 1) - 0 + 1)) + 0; //読み込むステージをランダム選択
         Sleep(200);
     }
@@ -194,24 +195,35 @@ void RandumPuzzle(){
         }    
         //ここにカウントダウン処理を入れる
         SetFontSize(64);
-        DrawFormatString(0, 0, Color3, "%d", 5 - count);
+        DrawFormatString(270, 50, Color_black, "%d", 5 - count);
         Sleep(1000);
         count++;
 
 
         if (count == 6) {
             DrawExtendGraph(0, 0, WindowSize_x, WindowSize_y, pic_randumstage, FALSE);
-            DrawRandumPanel(stage); //パズル描画
-            DrawString(0,0,"START",Color3);
+            DrawRandumPanel(stage); //パズル描画            
             IsPlaying = TRUE;
-            count = 1000;
+            count = 100;            
         }
     }
-    else if (IsPlaying == TRUE) {
+    else if (IsPlaying == TRUE && IsGameOver == FALSE) {
+        framecount++;        
         DrawExtendGraph(0, 0, WindowSize_x, WindowSize_y, pic_randumstage, FALSE);  //背景描画
         DrawRandumPanel(stage); //パズル描画
-        DrawFormatString(0, 0, Color3, "%d", count/100); //残り時間表示
-        count--;
+        if (framecount < 50) {  //50フレーム表示
+            DrawString(210, 50, "START", Color_black);
+        }
+        else if (framecount >= 50 && count != -1) {  //50フレーム後表示
+            DrawFormatString(270, 50, Color_black, "%d", count / 50); //残り時間表示
+            count--;
+        }else if (count == -1) {
+            PlaySoundBack(sound_gameover, TRUE);
+            DrawString(150, 50, "GAME OVER", Color_black);
+            IsGameOver = TRUE;
+            Sleep(1000);
+        }
+        
         
         // マウスの位置と状態を取得
         GetMousePoint(&MouseX, &MouseY);
@@ -238,11 +250,18 @@ void RandumPuzzle(){
             CopyArr(stage, generated_stage[stage_num]);
             count = 1000;
         }
-        if (count == 0) {
-            PlaySoundBack(sound_gameover, TRUE);
-            DrawString(0, 0, "GAME OVER", Color);
-            Sleep(200);
-        }
+        
+    }
+    else if (IsGameOver == TRUE) {
+        DrawExtendGraph(0, 0, WindowSize_x, WindowSize_y, pic_randumstage, FALSE);  //背景描画
+        DrawRandumPanel(stage); //パズル描画
+        DrawExtendGraph(WindowSize_x/7, WindowSize_y/7, WindowSize_x/7*6, WindowSize_y/7*6, pic_result, TRUE);  //背景描画
+
+        GetMousePoint(&MouseX, &MouseY);
+
+        count = 1000;
+        //Sleep(3000);
+        WaitKey();
     }
 
 
@@ -262,12 +281,12 @@ void selectMETHOD() {
         Sleep(200);
     }
     // 文字の描画
-    DrawString(80, 40, "使うSolverを選んでね", Color);
+    DrawString(80, 40, "使うSolverを選んでね", Color_white);
     DrawString(120, 110, "反復深化法", Color2);
     DrawString(120, 160, "IDASTAR 1(優秀)", Color2);
     DrawString(120, 210, "IDASTAR 2(ザコ)", Color2);
-    DrawString(80, 60+method_num * 50, "⇒", Color);
-    DrawString(20, 270, "q:探索設定", Color);
+    DrawString(80, 60+method_num * 50, "⇒", Color_white);
+    DrawString(20, 270, "q:探索設定", Color_white);
 
     if (CheckHitKey(KEY_INPUT_DOWN) == 1 && KEYDOWNflg==0)
     {
@@ -297,11 +316,11 @@ void anime_OPTION() {
     }
     
     // 文字の描画
-    DrawString(50, 40, "パズルのスライドを描画する", Color);
-    DrawString(20, 70, "※する場合探索速度が格段に落ちます", Color);
+    DrawString(50, 40, "パズルのスライドを描画する", Color_white);
+    DrawString(20, 70, "※する場合探索速度が格段に落ちます", Color_white);
     DrawString(140, 160, "する", Color2);
     DrawString(140, 210, "しない", Color2);
-    DrawString(80, 210-animeflg*50, "⇒", Color);
+    DrawString(80, 210-animeflg*50, "⇒", Color_white);
     //DrawString(20, 270, "q:戻る", Color);
 
     if (CheckHitKey(KEY_INPUT_DOWN) == 1 && KEYDOWNflg == 0)
@@ -359,8 +378,8 @@ void selectSTAGE() {
         KEYDOWNflg = 0;
     }
     // 文字の描画
-    DrawString(20, 270, "q:戻る", Color);
-    DrawString(100, 20, "問題を選んでね", Color);
+    DrawString(20, 270, "q:戻る", Color_white);
+    DrawString(100, 20, "問題を選んでね", Color_white);
     DrawString(120, 60, "2手問題", Color2);
     DrawString(120, 90, "5手問題", Color2);
     DrawString(120, 120, "7手問題", Color2);
@@ -368,7 +387,7 @@ void selectSTAGE() {
     DrawString(120, 180, "17手問題", Color2);
     DrawString(120, 210, "15手問題1(激むず)", Color2);
     DrawString(120, 240, "15手問題2", Color2);
-    DrawString(80, 30 + stage_num * 30, "⇒", Color);
+    DrawString(80, 30 + stage_num * 30, "⇒", Color_white);
 
     if (CheckHitKey(KEY_INPUT_Q) == 1)status = METHOD;
 
@@ -487,6 +506,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
         pic_menuselect[i] = LoadGraph(filename);
     }
     pic_menucursor = LoadGraph(".\\image\\menu_cursor.png");
+    pic_result = LoadGraph(".\\image\\result.png");
 
     /*音楽読み込み*/
     sound_title = LoadSoundMem(".\\sound\\魔王魂  8bit13.mp3");

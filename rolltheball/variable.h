@@ -8,14 +8,15 @@
 // 変数
 const int WindowSize_x = 960;
 const int WindowSize_y = 640;
-unsigned int Color = GetColor(255, 255, 255);
+unsigned int Color_white = GetColor(255, 255, 255);
 unsigned int Color2 = GetColor(255, 0, 255);
-unsigned int Color3 = GetColor(0, 0, 0);
+unsigned int Color_black = GetColor(0, 0, 0);
+unsigned int color_red = ( 255, 255, 255);
 char filename[500];
 enum st {TITLE, MENU, METHOD, STAGE, RANDUM, START, MAIN, OPTION };
 clock_t start_clock, end_clock;
 
-int status = RANDUM;
+int status = MENU;
 int MouseInput;
 int MouseX = 0, MouseY = 0;
 int menucursor = 0;
@@ -36,10 +37,10 @@ int method_num = 1;
 int stage[PuzzleSize * PuzzleSize] = {};
 int stage_clear[16] = {};
 
-const int generatenum = 5;
+const int generatenum = 21;
 int generated_stage[generatenum][PuzzleSize * PuzzleSize] = { 0 };
 
-const int RandumPuzzleSize = 474; //耐久パズルのピクセルでの一辺の長さ
+const int RandumPuzzleSize = 474; //耐久パズルの一辺のピクセルでの長さ
 const int RandumPuzzleOneSize = RandumPuzzleSize / PuzzleSize;
 const int RandumPuzzleGap_x = 50, RandumPuzzleGap_y = 120;
 int Button;
@@ -55,6 +56,7 @@ int pic_startbutton;
 int pic_randumstage;
 int pic_menuselect[4];
 int pic_menucursor;
+int pic_result;
 
 int sound_title;
 int sound_title_enter;
